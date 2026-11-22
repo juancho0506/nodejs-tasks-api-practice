@@ -80,4 +80,36 @@ describe('Tasks API - null / unknown field handling', () => {
       expect(task).not.toHaveProperty('foo');
     });
   });
+
+  describe('GET /tasks query', () => {
+    it('returns an empty list (not an error) for an unknown status', async () => {
+      const res = await request(http).get('/tasks?status=banana').expect(200);
+      expect(res.body).toEqual([]);
+    });
+
+    it('rejects a zero or fractional limit with 400', async () => {
+      await request(http).get('/tasks?limit=0').expect(400);
+      await request(http).get('/tasks?limit=1.5').expect(400);
+    });
+
+    it('accepts the maximum limit of 100 and rejects anything above it with 400', async () => {
+      const service = app.get(TasksService);
+      for (let i = 0; i < 120; i++) service.create({ title: `t${i}` });
+      const ok = await request(http).get('/tasks?limit=100').expect(200);
+      expect(ok.body).toHaveLength(100);
+      await request(http).get('/tasks?limit=101').expect(400);
+    });
+
+    it('findAll caps the limit at the maximum without the pipe', () => {
+      const service = app.get(TasksService);
+      for (let i = 0; i < 120; i++) service.create({ title: `t${i}` });
+      expect(service.findAll(undefined, 500)).toHaveLength(100);
+    });
+
+    it('findAll applies the default page size without the pipe', () => {
+      const service = app.get(TasksService);
+      for (let i = 0; i < 60; i++) service.create({ title: `t${i}` });
+      expect(service.findAll()).toHaveLength(50);
+    });
+  });
 });

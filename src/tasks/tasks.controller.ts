@@ -12,6 +12,7 @@ import {
   Query,
 } from '@nestjs/common';
 import { CreateTaskDto } from './dto/create-task.dto';
+import { ListTasksQueryDto } from './dto/list-tasks-query.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { TasksService } from './tasks.service';
 
@@ -25,8 +26,9 @@ export class TasksController {
   }
 
   @Get()
-  findAll(@Query('status') status?: string, @Query('limit') limit?: string) {
-    return this.tasks.findAll(status, limit);
+  findAll(@Query() query: ListTasksQueryDto) {
+    console.log('Type of limit: ', typeof query.limit, 'value: ', query.limit);
+    return this.tasks.findAll(query.status, query.limit);
   }
 
   @Get('stats/by-assignee')
