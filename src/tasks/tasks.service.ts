@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateTaskDto } from './dto/create-task.dto';
-import { DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE } from './dto/list-tasks-query.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
+import { PAGE_LIMITS } from './tasks.constants';
 import { TaskStatus } from './task-status';
 
 export interface Task {
@@ -37,12 +37,12 @@ export class TasksService {
     return task;
   }
 
-  findAll(status?: string, limit: number = DEFAULT_PAGE_SIZE) {
+  findAll(status?: string, limit: number = PAGE_LIMITS.DEFAULT) {
     let result = this.tasks;
     if (status) {
       result = result.filter((t) => t.status === status);
     }
-    return result.slice(0, Math.min(limit, MAX_PAGE_SIZE));
+    return result.slice(0, Math.min(limit, PAGE_LIMITS.MAX));
   }
 
   findOne(id: number): Task {

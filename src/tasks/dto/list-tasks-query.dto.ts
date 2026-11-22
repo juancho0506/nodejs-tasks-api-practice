@@ -1,8 +1,6 @@
 import { Type } from 'class-transformer';
 import { IsInt, IsOptional, IsString, Max, Min } from 'class-validator';
-
-export const DEFAULT_PAGE_SIZE = 50;
-export const MAX_PAGE_SIZE = 100;
+import { PAGE_LIMITS } from '../tasks.constants';
 
 export class ListTasksQueryDto {
   // Not validated against TASK_STATUSES on purpose: an unknown status is just a
@@ -14,7 +12,7 @@ export class ListTasksQueryDto {
   @IsOptional()
   @Type(() => Number)
   @IsInt()
-  @Min(1)
-  @Max(MAX_PAGE_SIZE)
-  limit?: number = DEFAULT_PAGE_SIZE;
+  @Min(PAGE_LIMITS.MIN)
+  @Max(PAGE_LIMITS.MAX)
+  limit?: number = PAGE_LIMITS.DEFAULT;
 }

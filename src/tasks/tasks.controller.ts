@@ -27,11 +27,10 @@ export class TasksController {
 
   @Get()
   findAll(@Query() query: ListTasksQueryDto) {
-    console.log('Type of limit: ', typeof query.limit, 'value: ', query.limit);
     return this.tasks.findAll(query.status, query.limit);
   }
 
-  @Get('`stats/by-assignee`')
+  @Get('stats/by-assignee')
   statsByAssignee() {
     return this.tasks.statsByAssignee();
   }
