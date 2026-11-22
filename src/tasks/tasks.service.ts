@@ -1,6 +1,7 @@
-import { Injectable } from '@nestjs/common';
-
-export type TaskStatus = 'todo' | 'in_progress' | 'done';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { CreateTaskDto } from './dto/create-task.dto';
+import { UpdateTaskDto } from './dto/update-task.dto';
+import { TaskStatus } from './task-status';
 
 export interface Task {
   id: number;
@@ -9,6 +10,8 @@ export interface Task {
   assignee?: string;
   createdAt: string;
 }
+
+const UPDATABLE_FIELDS = ['title', 'status', 'assignee'] as const;
 
 @Injectable()
 export class TasksService {
@@ -19,12 +22,15 @@ export class TasksService {
   ];
   private nextId = 4;
 
-  create(data: any) {
-    const task = {
+  create(data: CreateTaskDto) {
+    // Pick known fields explicitly: safe even if the validation pipe is off.
+    const { title, status = 'todo', assignee } = data;
+    const task: Task = {
       id: this.nextId++,
       createdAt: new Date().toISOString(),
-      status: 'todo',
-      ...data,
+      title,
+      status,
+      assignee,
     };
     this.tasks.push(task);
     return task;
@@ -33,18 +39,23 @@ export class TasksService {
   findAll(status?: string, limit?: string) {
     let result = this.tasks;
     if (status) {
-      result = result.filter((t) => (t.status = status as TaskStatus));
+      result = result.filter((t) => t.status === status);
     }
     return result.slice(0, limit as any);
   }
 
-  findOne(id: any) {
-    return this.tasks.find((t) => t.id === id);
+  findOne(id: number): Task {
+    const task = this.tasks.find((t) => t.id === id);
+    if (!task) throw new NotFoundException(`Task ${id} not found`);
+    return task;
   }
 
-  update(id: any, data: any) {
+  update(id: any, data: UpdateTaskDto) {
     const task = this.tasks.find((t) => t.id == id);
-    Object.assign(task, data);
+    // Only these fields are updatable, whatever the caller passes in.
+    for (const key of UPDATABLE_FIELDS) {
+      if (data[key] !== undefined) Object.assign(task, { [key]: data[key] });
+    }
     return task;
   }
 
