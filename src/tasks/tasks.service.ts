@@ -67,11 +67,18 @@ export class TasksService {
   }
 
   statsByAssignee() {
-    const assignees = [...new Set(this.tasks.map((t) => t.assignee ?? 'unassigned'))];
-    return assignees.map((name) => ({
-      assignee: name,
-      total: this.tasks.filter((t) => (t.assignee ?? 'unassigned') === name).length,
-      done: this.tasks.filter((t) => (t.assignee ?? 'unassigned') === name && t.status === 'done').length,
-    }));
+    // Single pass: O(n). Map keeps first-appearance order of assignees.
+    const stats = new Map<string, { assignee: string; total: number; done: number }>();
+    for (const task of this.tasks) {
+      const name = task.assignee ?? 'unassigned';
+      let entry = stats.get(name);
+      if (!entry) {
+        entry = { assignee: name, total: 0, done: 0 };
+        stats.set(name, entry);
+      }
+      entry.total++;
+      if (task.status === 'done') entry.done++;
+    }
+    return [...stats.values()];
   }
 }

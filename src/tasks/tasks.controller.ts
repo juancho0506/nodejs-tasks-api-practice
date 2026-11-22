@@ -31,7 +31,7 @@ export class TasksController {
     return this.tasks.findAll(query.status, query.limit);
   }
 
-  @Get('stats/by-assignee')
+  @Get('`stats/by-assignee`')
   statsByAssignee() {
     return this.tasks.statsByAssignee();
   }
