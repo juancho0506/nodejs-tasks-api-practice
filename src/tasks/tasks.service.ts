@@ -50,8 +50,8 @@ export class TasksService {
     return task;
   }
 
-  update(id: any, data: UpdateTaskDto) {
-    const task = this.tasks.find((t) => t.id == id);
+  update(id: number, data: UpdateTaskDto): Task {
+    const task = this.findOne(id);
     // Only these fields are updatable, whatever the caller passes in.
     for (const key of UPDATABLE_FIELDS) {
       if (data[key] !== undefined) Object.assign(task, { [key]: data[key] });
@@ -59,8 +59,9 @@ export class TasksService {
     return task;
   }
 
-  remove(id: any) {
-    const index = this.tasks.findIndex((t) => t.id == id);
+  remove(id: number): void {
+    const index = this.tasks.findIndex((t) => t.id === id);
+    if (index === -1) throw new NotFoundException(`Task ${id} not found`);
     this.tasks.splice(index, 1);
   }
 
