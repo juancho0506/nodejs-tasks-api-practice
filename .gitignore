@@ -1,2 +1,23 @@
+# dependencies and build output
 node_modules
 dist
+
+# test coverage
+coverage
+
+# environment files and secrets
+.env
+.env.*
+!.env.example
+
+# logs
+*.log
+npm-debug.log*
+
+# OS / editor
+.DS_Store
+.idea
+.vscode
+
+# Claude Code local settings
+.claude/settings.local.json
